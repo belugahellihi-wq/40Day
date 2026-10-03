@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>40 дней</title>
+<style>
+  :root {
+    --bg: #0f2a24;
+    --panel: #163a32;
+    --line: #2a5a4e;
+    --text: #f1ece0;
+    --muted: #9fb8ae;
+    --gold: #e0b44c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.8rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .progress { background: var(--panel); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+  .bar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; margin-top: 8px; }
+  .fill { height: 100%; width: 0; background: var(--gold); transition: width .3s; }
+  .day {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+    cursor: pointer;
+  }
+  .day.done { border-color: var(--gold); }
+  .day.done .text { color: var(--muted); text-decoration: line-through; }
+  .num { font-weight: bold; min-width: 64px; }
+  .text { flex: 1; }
+  input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0; }
+  input[type=checkbox]:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  button {
+    margin-top: 16px; background: none; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px;
+    font: inherit; cursor: pointer;
+  }
+  button:hover { color: var(--text); border-color: var(--muted); }
+  .finish { display: none; text-align: center; color: var(--gold); font-size: 1.2rem; margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>40 дней</h1>
+  <p class="sub">Воздержание и тренировка ради Аллаха</p>
+
+  <div class="progress">
+    <span id="count">0 из 40</span>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+  </div>
+
+  <div class="finish" id="finish">Все 40 дней пройдены. Мā шāʼ Аллāh!</div>
+  <div id="list"></div>
+</div>
+
+<script>
+  const TOTAL = 40;
+  const KEY = "challenge40";
+  let state = new Array(TOTAL).fill(false);
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY));
+    if (Array.isArray(saved) && saved.length === TOTAL) state = saved;
+  } catch (e) {}
+
+  const list = document.getElementById("list");
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function render() {
+    list.innerHTML = "";
+    state.forEach((done, i) => {
+      const row = document.createElement("label");
+      row.className = "day" + (done ? " done" : "");
+      row.innerHTML =
+        '<span class="num">День ' + (i + 1) + '</span>' +
+        '<span class="text">Воздержание и тренировка ради Аллаха</span>' +
+        '<input type="checkbox"' + (done ? " checked" : "") + '>';
+      row.querySelector("input").addEventListener("change", e => {
+        state[i] = e.target.checked;
+        save();
+        render();
+      });
+      list.appendChild(row);
+    });
+    const n = state.filter(Boolean).length;
+    document.getElementById("count").textContent = n + " из " + TOTAL;
+    document.getElementById("fill").style.width = (n / TOTAL * 100) + "%";
+    document.getElementById("finish").style.display = n === TOTAL ? "block" : "none";
+  }
+
+  render();
+</script>
+</body>
+</html>
